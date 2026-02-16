@@ -3,12 +3,23 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import User
 
 class UserRegistrationForm(forms.ModelForm): # Agora herda de ModelForm
-    password = forms.CharField(label="Senha", widget=forms.PasswordInput)
-    password_confirm = forms.CharField(label="Confirme a Senha", widget=forms.PasswordInput)
+    password = forms.CharField(label="Senha", widget=forms.PasswordInput,
+                               error_messages={'required': 'Este campo é obrigatório.'})
+    password_confirm = forms.CharField(label="Confirme a Senha", widget=forms.PasswordInput,
+                                       error_messages={'required': 'Este campo é obrigatório.'})
 
     class Meta:
         model = User
-        fields = ('name', 'email') # Apenas os campos do modelo que queremos no formulário
+        fields = ('name', 'email')
+        error_messages = {
+            'name': {
+                'required': 'Este campo é obrigatório.',
+            },
+            'email': {
+                'required': 'Este campo é obrigatório.',
+                'invalid': 'Insira um endereço de e-mail válido.',
+            }
+        } # Apenas os campos do modelo que queremos no formulário
 
     def clean_password_confirm(self):
         password = self.cleaned_data.get("password")
@@ -32,10 +43,14 @@ class UserRegistrationForm(forms.ModelForm): # Agora herda de ModelForm
 
 class UserAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="E-mail", max_length=254,
-                                widget=forms.TextInput(attrs={'autofocus': True}))
+                                widget=forms.TextInput(attrs={'autofocus': True}),
+                                error_messages={'required': 'Preencha este campo.',
+                                                'invalid': 'Insira um endereço de e-mail válido.'})
+    password = forms.CharField(label="Senha", widget=forms.PasswordInput,
+                               error_messages={'required': 'Preencha este campo.'})
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.error_messages['invalid_login'] = "Por favor, insira um e-mail e senha corretos. Note que ambos os campos podem ser sensíveis a maiúsculas e minúsculas."
+        self.error_messages['invalid_login'] = "Por favor, insira um e-mail e senha corretos."
         self.error_messages['inactive'] = "Esta conta está inativa."
 

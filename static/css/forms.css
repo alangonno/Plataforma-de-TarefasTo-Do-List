@@ -1,0 +1,291 @@
+/* ============================================
+   FORMS.CSS - Estilização de Formulários
+   Design: Feedback visual forte e estados claros
+   ============================================ */
+
+/* Form Base */
+.auth-form,
+.task-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.form-row-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.form-group-wide {
+    width: 100%;
+}
+
+.form-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translate(-1px, -1px);
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="date"]:hover,
+textarea:hover,
+select:hover {
+    border-color: var(--color-text-secondary);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: var(--font-body);
+}
+
+/* Form Input and Textarea classes */
+.form-input {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translate(-1px, -1px);
+}
+
+/* Help Text */
+.form-help {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+/* Checkbox Styling */
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.task-checkbox {
+    width: 24px;
+    height: 24px;
+    border: var(--border-width) solid var(--color-border);
+    background-color: var(--color-surface);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+}
+
+.task-checkbox:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-border);
+}
+
+.task-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.task-checkbox:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.task-checkbox:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.checkbox-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Custom Checkbox for Task List */
+.task-checkbox-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    flex-direction: row-reverse;
+}
+
+.task-checkbox-wrapper input[type="checkbox"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    cursor: pointer;
+}
+
+.checkbox-custom {
+    width: 28px;
+    height: 28px;
+    border: var(--border-width) solid var(--color-border);
+    background-color: var(--color-surface);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    display: inline-block;
+    box-shadow: var(--shadow-sm);
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom {
+    background-color: var(--color-primary);
+    border-color: var(--color-border);
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:hover + .checkbox-custom {
+    border-color: var(--color-primary);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-md);
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:focus + .checkbox-custom {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+
+.password-strength {
+    margin-top: var(--space-xs);
+}
+
+.strength-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--color-border-light);
+    border: 2px solid var(--color-border);
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all var(--transition-base);
+    background-color: var(--color-border-light);
+}
+
+.strength-text {
+    display: block;
+    margin-top: var(--space-xs);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+/* Form Errors */
+.form-errors {
+    color: var(--color-error);
+    font-weight: 500;
+    margin-top: var(--space-sm);
+}
+
+

@@ -1,0 +1,251 @@
+/* ============================================
+   RESPONSIVE.CSS - Mobile-First Responsivo
+   Design: Adaptação para tablets e smartphones
+   ============================================ */
+
+/* Tablet (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Typography adjustments */
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+    
+    /* Header */
+    .header-content {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+    }
+    
+    .main-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-link {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+        min-height: auto;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-visual {
+        height: 300px;
+        order: -1;
+    }
+    
+    .visual-box-1 {
+        width: 150px;
+        height: 150px;
+        right: 80px;
+    }
+    
+    .visual-box-2 {
+        width: 120px;
+        height: 120px;
+        top: 100px;
+    }
+    
+    .visual-box-3 {
+        width: 80px;
+        height: 80px;
+        bottom: 40px;
+        right: 120px;
+    }
+    
+    /* Features Section */
+    .features-section {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+    
+    /* CTA Buttons */
+    .cta-buttons {
+        flex-direction: column;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+    }
+    
+    /* Auth Card */
+    .auth-card {
+        padding: var(--space-lg);
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+    }
+    
+    /* Tasks */
+    .tasks-title {
+        font-size: 2.5rem;
+    }
+    
+    .section-card {
+        padding: var(--space-lg);
+    }
+    
+    .form-row-split {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-buttons {
+        flex-direction: column;
+    }
+    
+    .filter-btn {
+        width: 100%;
+    }
+    
+    .task-view {
+        flex-direction: column;
+    }
+    
+    .task-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .edit-actions {
+        flex-direction: column;
+    }
+    
+    .edit-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    /* Base adjustments */
+    html {
+        font-size: 14px;
+    }
+    
+    /* Spacing */
+    .main-content {
+        padding: var(--space-lg) var(--space-md);
+    }
+    
+    /* Typography */
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .tasks-title {
+        font-size: 2rem;
+    }
+    
+    /* Header */
+    .logo {
+        font-size: 1.5rem;
+    }
+    
+    /* Hero Visual */
+    .hero-visual {
+        height: 250px;
+    }
+    
+    .visual-box-1 {
+        width: 120px;
+        height: 120px;
+        right: 60px;
+    }
+    
+    .visual-box-2 {
+        width: 100px;
+        height: 100px;
+        top: 80px;
+    }
+    
+    .visual-box-3 {
+        width: 60px;
+        height: 60px;
+        bottom: 30px;
+        right: 100px;
+    }
+    
+    /* Cards */
+    .section-card {
+        padding: var(--space-md);
+    }
+    
+    .auth-card {
+        padding: var(--space-md);
+    }
+    
+    .feature-card {
+        padding: var(--space-lg);
+    }
+    
+    /* Task Items */
+    .task-item {
+        padding: var(--space-md);
+    }
+    
+    .task-main {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .task-title {
+        font-size: 1.1rem;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.95rem;
+    }
+    
+    .btn-edit,
+    .btn-delete {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: 0.85rem;
+    }
+    
+    /* Form adjustments */
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+/* Print styles */
+@media print {
+    .site-header,
+    .site-footer,
+    .task-actions,
+    .filter-buttons,
+    .task-creation-section,
+    .btn {
+        display: none !important;
+    }
+    
+    .task-item {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}

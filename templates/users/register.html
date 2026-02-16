@@ -1,81 +1,136 @@
 {% extends 'base.html' %}
 
+{% block title %}Cadastro - TaskFlow{% endblock %}
+
 {% block content %}
-  <h2>Registrar</h2>
-  <form method="post" novalidate>
-    {% csrf_token %}
-
-    {# Display non-field errors #}
-    {% if form.non_field_errors %}
-      <div class="alert alert-danger" role="alert">
-        {% for error in form.non_field_errors %}
-          {{ error }}
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <div class="form-group">
-      {{ form.name.label_tag }}
-      {{ form.name }}
-      {% if form.name.help_text %}
-        <small class="form-text text-muted">{{ form.name.help_text }}</small>
-      {% endif %}
-      {% if form.name.errors %}
-        <div class="alert alert-danger">
-          {% for error in form.name.errors %}
-            {{ error }}
-          {% endfor %}
+<!-- Design: Card moderno com feedback visual e indicador de senha -->
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 class="auth-title">Cadastro</h2>
+            <p class="auth-subtitle">Crie sua conta</p>
         </div>
-      {% endif %}
-    </div>
+        
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
 
-    <div class="form-group">
-      {{ form.email.label_tag }}
-      {{ form.email }}
-      {% if form.email.help_text %}
-        <small class="form-text text-muted">{{ form.email.help_text }}</small>
-      {% endif %}
-      {% if form.email.errors %}
-        <div class="alert alert-danger">
-          {% for error in form.email.errors %}
-            {{ error }}
-          {% endfor %}
+            {# Display non-field errors #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-error" role="alert">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Nome</label>
+                {{ form.name }}
+                {% if form.name.help_text %}
+                    <small class="form-help">{{ form.name.help_text }}</small>
+                {% endif %}
+                {% if form.name.errors %}
+                    <div class="alert alert-error">
+                        {% for error in form.name.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}" class="form-label">E-mail</label>
+                {{ form.email }}
+                {% if form.email.help_text %}
+                    <small class="form-help">{{ form.email.help_text }}</small>
+                {% endif %}
+                {% if form.email.errors %}
+                    <div class="alert alert-error">
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
+                {{ form.password }}
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strength-fill"></div>
+                    </div>
+                    <span class="strength-text" id="strength-text">Digite uma senha</span>
+                </div>
+                {% if form.password.help_text %}
+                    <small class="form-help">{{ form.password.help_text }}</small>
+                {% endif %}
+                {% if form.password.errors %}
+                    <div class="alert alert-error">
+                        {% for error in form.password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password_confirm.id_for_label }}" class="form-label">Confirme a Senha</label>
+                {{ form.password_confirm }}
+                {% if form.password_confirm.help_text %}
+                    <small class="form-help">{{ form.password_confirm.help_text }}</small>
+                {% endif %}
+                {% if form.password_confirm.errors %}
+                    <div class="alert alert-error">
+                        {% for error in form.password_confirm.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p class="auth-link-text">Já tem uma conta? <a href="{% url 'users:login' %}" class="auth-link">Faça login</a></p>
         </div>
-      {% endif %}
     </div>
+</div>
 
-   ]
-    <div class="form-group">
-      {{ form.password.label_tag }}
-      {{ form.password }}
-      {% if form.password.help_text %}
-        <small class="form-text text-muted">{{ form.password.help_text }}</small>
-      {% endif %}
-      {% if form.password.errors %}
-        <div class="alert alert-danger">
-          {% for error in form.password.errors %}
-            {{ error }}
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-
-
-    <div class="form-group">
-      {{ form.password_confirm.label_tag }}
-      {{ form.password_confirm }}
-      {% if form.password_confirm.help_text %}
-        <small class="form-text text-muted">{{ form.password_confirm.help_text }}</small>
-      {% endif %}
-      {% if form.password_confirm.errors %}
-        <div class="alert alert-danger">
-          {% for error in form.password_confirm.errors %}
-            <br>{{ error }}
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-
-    <button type="submit">Registrar</button>
-  </form>
+<script>
+// Indicador visual de força de senha (somente UI)
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.querySelector('input[name="password"]');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthText = document.getElementById('strength-text');
+    
+    if (passwordInput && strengthFill && strengthText) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            const strengthLevels = ['Fraca', 'Média', 'Boa', 'Forte'];
+            const strengthColors = ['#e74c3c', '#f39c12', '#3498db', '#2ecc71'];
+            const strengthWidths = ['25%', '50%', '75%', '100%'];
+            
+            if (password.length === 0) {
+                strengthFill.style.width = '0%';
+                strengthText.textContent = 'Digite uma senha';
+                strengthFill.style.backgroundColor = '#ddd';
+            } else {
+                const level = Math.min(strength, 3);
+                strengthFill.style.width = strengthWidths[level];
+                strengthFill.style.backgroundColor = strengthColors[level];
+                strengthText.textContent = strengthLevels[level];
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
