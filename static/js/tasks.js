@@ -3,15 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const createTaskForm = document.getElementById('create-task-form');
     const filterButtons = document.querySelectorAll('.filter-btn');
 
+    // Obtém a URL base para a lista de tarefas do atributo 'data-task-list-url' do contêiner.
     const taskListUrl = taskListContainer.dataset.taskListUrl;
 
-    // Function to get CSRF token
+    // Função auxiliar para extrair o token CSRF de um cookie.
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
+                // Verifica se o cookie começa com o nome desejado.
                 if (cookie.startsWith(name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -23,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const csrftoken = getCookie('csrftoken');
 
-    // Function to clear existing form errors
     function clearFormErrors(formElement) {
         formElement.querySelectorAll('.alert.alert-error').forEach(errorDiv => {
             errorDiv.remove();
@@ -33,11 +34,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Function to display form errors from an AJAX response
-    function displayFormErrors(formElement, errors) {
-        clearFormErrors(formElement); // Clear existing errors first
+    // Função para exibir uma mensagem de erro genérica na parte superior do contêiner da lista de tarefas.
+    function displayGlobalError(message) {
+        clearGlobalErrors();
+        const errorDiv = document.createElement('div');
+        errorDiv.classList.add('alert', 'alert-error', 'global');
+        errorDiv.setAttribute('role', 'alert');
+        errorDiv.innerHTML = `<p>${message}</p>`;
+        taskListContainer.prepend(errorDiv); // Adiciona a mensagem de erro ao topo do contêiner.
+    }
 
-        // Handle non-field errors (e.g., __all__ errors)
+    // Função auxiliar para limpar mensagens de erro globais.
+    function clearGlobalErrors() {
+        taskListContainer.querySelectorAll('.alert.alert-error.global').forEach(errorDiv => errorDiv.remove());
+    }
+
+    // Exibe mensagens de erro de validação de um formulário recebidas de uma resposta AJAX.
+    function displayFormErrors(formElement, errors) {
+        clearFormErrors(formElement);
+
+        // Lida com erros que não estão associados a um campo específico do formulário.
         if (errors.__all__) {
             const nonFieldErrorsDiv = document.createElement('div');
             nonFieldErrorsDiv.classList.add('alert', 'alert-error');
@@ -45,80 +61,92 @@ document.addEventListener('DOMContentLoaded', () => {
             (Array.isArray(errors.__all__) ? errors.__all__ : [errors.__all__]).forEach(error => {
                 nonFieldErrorsDiv.innerHTML += `<p>${error}</p>`;
             });
-            formElement.prepend(nonFieldErrorsDiv); // Add to the top of the form
+            formElement.prepend(nonFieldErrorsDiv);
         }
 
-        // Handle field-specific errors
+        // Lida com erros associados a campos específicos do formulário.
         for (const fieldName in errors) {
             if (fieldName !== '__all__') {
                 const fieldInput = formElement.querySelector(`[name="${fieldName}"]`);
                 if (fieldInput) {
-                    fieldInput.classList.add('is-invalid'); // Add is-invalid class to the input
-                    const formGroup = fieldInput.closest('.form-group');
-                    if (formGroup) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.classList.add('alert', 'alert-error');
-                        (Array.isArray(errors[fieldName]) ? errors[fieldName] : [errors[fieldName]]).forEach(error => {
-                            errorDiv.innerHTML += `<p>${error}</p>`;
-                        });
-                        formGroup.appendChild(errorDiv); // Add after the input within the form-group
-                    }
+                    fieldInput.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.classList.add('alert', 'alert-error');
+                    (Array.isArray(errors[fieldName]) ? errors[fieldName] : [errors[fieldName]]).forEach(error => {
+                        errorDiv.innerHTML += `<p>${error}</p>`;
+                    });
+                    // Insere a div de erro imediatamente após o campo de entrada.
+                    fieldInput.parentNode.insertBefore(errorDiv, fieldInput.nextSibling);
                 }
             }
         }
     }
 
-    // --- Task Filtering ---
+    // --- Funcionalidade de Filtragem de Tarefas ---
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Update class names for active state
-            filterButtons.forEach(btn => btn.classList.remove('filter-btn-active')); // Changed from active
-            button.classList.add('filter-btn-active'); // Changed from active
+            clearGlobalErrors(); // Limpa erros globais antes de tentar filtrar.
+            
+            filterButtons.forEach(btn => btn.classList.remove('filter-btn-active'));
+            button.classList.add('filter-btn-active');
+
             const filter = button.dataset.filter;
-            let url = taskListUrl; // Use the URL from the data attribute
+            let url = taskListUrl;
+            
             if (filter !== 'all') {
                 url += `?completed=${filter}`;
             }
+
+            // Faz uma requisição AJAX para obter a lista de tarefas filtrada.
             fetch(url, {
                 headers: {
+                    // Sinaliza para o servidor que esta é uma requisição AJAX.
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.text())
+            .then(response => response.text()) // Espera texto HTML como resposta.
             .then(html => {
-                taskListContainer.innerHTML = html;
-                addEventListenersToTasks(); // Re-add event listeners for new tasks
+                taskListContainer.innerHTML = html; // Atualiza o conteúdo do contêiner da lista de tarefas.
+                addEventListenersToTasks(); // Re-adiciona os event listeners para as novas tarefas carregadas.
             })
-            .catch(error => console.error('Error fetching filtered tasks:', error));
+            .catch(error => {
+                // Erros de rede ou do servidor são capturados aqui. Exibe mensagem genérica.
+                displayGlobalError('Ocorreu um erro ao carregar as tarefas. Tente novamente.');
+            });
         });
     });
 
-    // --- Task Creation ---
+    // --- Funcionalidade de Criação de Tarefas ---
     if (createTaskForm) {
         createTaskForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Impede o envio padrão do formulário, que recarregaria a página.
+            clearGlobalErrors(); // Limpa erros globais antes de tentar criar uma tarefa.
 
             const formData = new FormData(createTaskForm);
 
+            // Envia os dados do formulário via AJAX para criar uma nova tarefa.
             fetch(createTaskForm.action, {
                 method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrftoken
+                    'X-Requested-With': 'XMLHttpRequest', // Sinaliza requisição AJAX.
+                    'X-CSRFToken': csrftoken // Inclui o token CSRF para segurança.
                 },
-                body: formData
+                body: formData // Envia os dados do formulário.
             })
             .then(response => {
+                // Verifica se a resposta HTTP indica um erro (status 4xx ou 5xx).
                 if (!response.ok) {
+                    // Se houver erro, tenta parsear a resposta como JSON para obter detalhes do erro.
                     return response.json().then(err => Promise.reject(err));
                 }
-                return response.json();
+                return response.json(); // Se a resposta for bem-sucedida, parseia como JSON.
             })
             .then(data => {
                 if (data.success) {
-                    clearFormErrors(createTaskForm); // Clear any existing errors
+                    clearFormErrors(createTaskForm);
                     createTaskForm.reset();
-                    // Dynamically add the new task to the list
+
+                    // Constrói o HTML dinamicamente.
                     const newTaskHtml = `
                         <li class="task-item" id="task-item-${data.task.id}">
                             <div class="task-view" id="task-view-${data.task.id}">
@@ -182,51 +210,61 @@ document.addEventListener('DOMContentLoaded', () => {
                         </li>
                     `;
                     const ul = taskListContainer.querySelector('ul');
-                    if (ul.querySelector('li') && ul.querySelector('li').textContent.includes('Nenhuma tarefa encontrada.')) { // Check for "Nenhuma tarefa encontrada." more robustly
-                        ul.innerHTML = newTaskHtml; // Replace "No tasks found" message
+                    // Verifica se a lista está vazia com a mensagem "Nenhuma tarefa encontrada." para substituir.
+                    if (ul.querySelector('li') && ul.querySelector('li').textContent.includes('Nenhuma tarefa encontrada.')) {
+                        ul.innerHTML = newTaskHtml;
                     } else {
+                        // Adiciona a nova tarefa ao final da lista.
                         ul.insertAdjacentHTML('beforeend', newTaskHtml);
                     }
-                    addEventListenersToTasks(); // Re-add event listeners for the new task
+                    addEventListenersToTasks(); // Re-adiciona os event listeners para a nova tarefa.
                 }
             })
             .catch(error => {
-                // Assuming error.errors contains the Django form errors
-                displayFormErrors(createTaskForm, error.errors);
+                // Se o erro vier do servidor com validações, exibe-as no formulário.
+                // Caso contrário (ex: erro de rede), exibe uma mensagem global genérica.
+                if (error && error.errors) {
+                    displayFormErrors(createTaskForm, error.errors);
+                } else {
+                    displayGlobalError('Ocorreu um erro ao criar a tarefa. Tente novamente.');
+                }
             });
         });
     }
 
-    // --- Event Listeners for existing and new tasks ---
+    // --- Gerenciamento de Event Listeners para Tarefas (existentes e novas)
     function addEventListenersToTasks() {
-        // Toggle completed status
         document.querySelectorAll('.task-completed-toggle').forEach(checkbox => {
             checkbox.onchange = (e) => {
                 const taskId = e.target.dataset.taskId;
                 const completed = e.target.checked;
+                clearGlobalErrors(); // Limpa erros globais antes de tentar atualizar.
                 
                 const currentTaskItem = document.getElementById(`task-item-${taskId}`);
                 const title = currentTaskItem.querySelector('.task-title').textContent;
                 const description = currentTaskItem.querySelector('.task-description').textContent;
                 const dueDateSpan = currentTaskItem.querySelector('.task-due-date');
-                const due_date_text = dueDateSpan ? dueDateSpan.textContent.replace('Prazo: ', '') : ''; // Adjusted from (Prazo: )
+                // Prazo: DD-MM-YYYY" (ajustar conforme formato real)
+                const due_date_text = dueDateSpan ? dueDateSpan.textContent.replace('Prazo: ', '') : '';
                 
-                // due_date para DD--MM-YYYY
                 let due_date = '';
+                // Garante que a data esteja no formato correto (YYYY-MM-DD) para envio ao backend.
+                // Adapte o `split` e a ordem dos `parts` se o formato na tela for diferente.
                 if (due_date_text) {
-                    const parts = due_date_text.split('/');
+                    const parts = due_date_text.split('-'); // Supondo o formato DD-MM-YYYY
                     if (parts.length === 3) {
-                        due_date = `${parts[0]}-${parts[1]}-${parts[2]}`;
+                        due_date = `${parts[2]}-${parts[1]}-${parts[0]}`; // Converte para YYYY-MM-DD
                     }
                 }
 
                 const formData = new FormData();
-                formData.append('title', title); // Send existing title
-                formData.append('description', description === 'Sem descrição.' ? '' : description); // Send existing description
-                formData.append('due_date', due_date); // Send existing due_date
+                formData.append('title', title);
+                formData.append('description', description === 'Sem descrição.' ? '' : description);
+                formData.append('due_date', due_date);
                 formData.append('completed', completed);
                 formData.append('csrfmiddlewaretoken', csrftoken);
 
+                // Envia a requisição AJAX para atualizar o status da tarefa.
                 fetch(`/tasks/${taskId}/update/`, {
                     method: 'POST',
                     headers: {
@@ -243,30 +281,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(data => {
                     if (data.success) {
-                        // Update class name for completed status
-                        const taskTitleSpan = document.querySelector(`#task-item-${taskId} .task-title`);
-                        if (data.task.completed) {
-                            taskTitleSpan.classList.add('task-completed'); // Changed from completed
-                        } else {
-                            taskTitleSpan.classList.remove('task-completed'); // Changed from completed
-                        }
+                        
+                        document.querySelector(`#task-item-${taskId} .task-title`).classList.toggle('task-completed', data.task.completed);
                     } else {
-                        console.error('Error updating task status:', data.errors);
-                        e.target.checked = !completed; // Revert checkbox state
+                        // Se o erro vier do servidor com validações, exibe-as como erro global.
+                        displayGlobalError(data.errors && data.errors.__all__ ? data.errors.__all__[0] : 'Ocorreu um erro ao atualizar o status da tarefa. Tente novamente.');
+                        e.target.checked = !completed; // Reverte o estado do checkbox em caso de erro.
                     }
                 })
                 .catch(error => {
-                    console.error('Network error updating task status:', error);
-                    e.target.checked = !completed; // Revert checkbox state
+                    // Erros de rede ou do servidor são capturados aqui. Exibe mensagem genérica.
+                    displayGlobalError('Ocorreu um erro ao atualizar o status da tarefa. Tente novamente.');
+                    e.target.checked = !completed; // Reverte o estado do checkbox em caso de erro de rede.
                 });
             };
         });
 
-        // Delete Task
+        // Lida com a exclusão de tarefas via envio de formulário AJAX.
         document.querySelectorAll('.delete-task-form').forEach(form => {
             form.onsubmit = (e) => {
                 e.preventDefault();
                 const taskId = e.target.querySelector('button').dataset.taskId;
+                clearGlobalErrors(); // Limpa erros globais antes de tentar excluir.
 
                 fetch(form.action, {
                     method: 'POST',
@@ -276,42 +312,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: new FormData(form)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) { // Check response.ok for network errors before parsing JSON
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        document.getElementById(`task-item-${taskId}`).remove();
-                        // If no tasks left, show "Nenhuma tarefa encontrada."
+                        document.getElementById(`task-item-${taskId}`).remove(); // Remove o item da tarefa do DOM.
                         const ul = taskListContainer.querySelector('ul');
+                        // Se não houver mais tarefas, exibe a mensagem de "Nenhuma tarefa encontrada.".
                         if (!ul.querySelector('li')) {
-                            ul.innerHTML = '<li class="task-empty"><p class="empty-message">Nenhuma tarefa encontrada.</p></li>'; // Updated empty message HTML
+                            ul.innerHTML = '<li class="task-empty"><p class="empty-message">Nenhuma tarefa encontrada.</p></li>';
                         }
                     } else {
-                        console.error('Error deleting task:', data.errors);
+                        // Se o erro vier do servidor com validações, exibe-as como erro global.
+                        displayGlobalError(data.errors && data.errors.__all__ ? data.errors.__all__[0] : 'Ocorreu um erro ao excluir a tarefa. Tente novamente.');
                     }
                 })
-                .catch(error => console.error('Network error deleting task:', error));
+                .catch(error => {
+                    displayGlobalError('Ocorreu um erro ao excluir a tarefa. Tente novamente.');
+                });
             };
         });
 
-        // Edit Task Toggle
+        // Alterna a visibilidade do formulário de edição da tarefa.
         document.querySelectorAll('.edit-task-button').forEach(button => {
             button.onclick = (e) => {
                 const taskId = e.target.dataset.taskId;
-                document.getElementById(`edit-form-${taskId}`).style.display = 'block';
-                e.target.style.display = 'none'; // Hide edit button
+                document.getElementById(`edit-form-${taskId}`).style.display = 'block'; // Mostra o formulário de edição.
+                e.target.style.display = 'none'; // Esconde o botão "Editar".
             };
         });
 
-        // Cancel Edit
+        // Cancela a edição, escondendo o formulário e mostrando o botão "Editar".
         document.querySelectorAll('.cancel-edit-button').forEach(button => {
             button.onclick = (e) => {
                 const taskId = e.target.dataset.taskId;
-                document.getElementById(`edit-form-${taskId}`).style.display = 'none';
-                document.querySelector(`#task-item-${taskId} .edit-task-button`).style.display = 'inline'; // Show edit button
+                document.getElementById(`edit-form-${taskId}`).style.display = 'none'; // Esconde o formulário de edição.
+                document.querySelector(`#task-item-${taskId} .edit-task-button`).style.display = 'inline'; // Mostra o botão "Editar".
             };
         });
 
-        // Actual Task Update Submission
+        // Lida com o envio do formulário de atualização de tarefa via AJAX.
         document.querySelectorAll('.edit-task-form-actual').forEach(form => {
             form.onsubmit = (e) => {
                 e.preventDefault();
@@ -336,38 +380,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.success) {
                         const taskItem = document.getElementById(`task-item-${taskId}`);
                         const task = data.task;
+                        // Atualiza dinamicamente os detalhes da tarefa no DOM com os novos dados.
                         taskItem.querySelector('.task-title').textContent = task.title;
-                        taskItem.querySelector('.task-title').classList.toggle('task-completed', task.completed); // Changed from completed
+                        taskItem.querySelector('.task-title').classList.toggle('task-completed', task.completed);
                         taskItem.querySelector('.task-completed-toggle').checked = task.completed;
                         taskItem.querySelector('.task-description').textContent = task.description || 'Sem descrição.';
                         const dueDateSpan = taskItem.querySelector('.task-due-date');
                         if (task.due_date) {
                             if (dueDateSpan) {
-                                dueDateSpan.textContent = `Prazo: ${task.due_date}`; // Adjusted from (Prazo: )
+                                // Se o span de data de vencimento já existe, atualiza seu conteúdo.
+                                dueDateSpan.textContent = `Prazo: ${task.due_date}`;
                             } else {
-                                // If no due_date span existed, create one
+                                // Se não existe, cria um novo span e o insere após o título.
                                 const titleSpan = taskItem.querySelector('.task-title');
-                                titleSpan.insertAdjacentHTML('afterend', `<span class="task-due-date">Prazo: ${task.due_date}</span>`); // Adjusted from (Prazo: )
+                                titleSpan.insertAdjacentHTML('afterend', `<span class="task-due-date">Prazo: ${task.due_date}</span>`);
                             }
                         } else {
-                            if (dueDateSpan) dueDateSpan.remove(); // Remove if no due date
+                            if (dueDateSpan) dueDateSpan.remove(); // Remove o span se a data de vencimento for removida.
                         }
 
-                        // Hide edit form and show edit button
                         document.getElementById(`edit-form-${taskId}`).style.display = 'none';
                         document.querySelector(`#task-item-${taskId} .edit-task-button`).style.display = 'inline';
                     } else {
-                        console.error('Error updating task:', data.errors);
+                        // Em um ambiente de produção, erros de validação seriam exibidos ao usuário na UI, não no console.
                         displayFormErrors(form, data.errors);
                     }
                 })
                 .catch(error => {
-                    console.error('Network error updating task:', error);
                     displayFormErrors(form, { '__all__': ['Ocorreu um erro de rede ao atualizar a tarefa.'] });
                 });
             };
         });
     }
 
-    addEventListenersToTasks(); // Add event listeners initially
+    addEventListenersToTasks(); // Inicializa os event listeners para as tarefas carregadas inicialmente.
 });

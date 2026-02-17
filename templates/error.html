@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Erro {{ status_code }}{% endblock %}
+
+{% block content %}
+<main class="error-page-container">
+    <section class="error-content">
+        <h1 class="error-code">Erro {{ status_code }}</h1>
+        <p class="error-message">
+            {% if message %}
+                {{ message }}
+            {% else %}
+                Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.
+            {% endif %}
+        </p>
+        <p class="error-explanation">
+            {% elif status_code == 404 %}
+                A página que você está procurando não foi encontrada.
+            {% elif status_code == 500 %}
+                Um erro interno do servidor impediu a conclusão da sua requisição.
+            {% else %}
+                Lamentamos, mas algo deu errado.
+            {% endif %}
+        </p>
+        <a href="/" class="btn btn-primary error-home-link">Voltar para a Página Inicial</a>
+    </section>
+</main>
+{% endblock %}

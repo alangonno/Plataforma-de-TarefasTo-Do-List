@@ -123,3 +123,6 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = 'users.User'
+
+LOGIN_URL = '/users/login/' # URL para redirecionar
+LOGIN_REDIRECT_URL = '/' # URL para redirecionar caso login bem sucedido.
