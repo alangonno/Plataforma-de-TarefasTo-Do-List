@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from http import HTTPStatus
 from .models import Task
 from .forms import TaskForm
 
@@ -12,7 +13,7 @@ class TaskListView(LoginRequiredMixin, ListView):
     context_object_name = 'tasks'
 
     def get_queryset(self):
-        # Ensure only tasks belonging to the logged-in user are returned
+        # Garante que apenas as tarefas pertencentes ao usuário logado sejam retornadas.
         queryset = Task.objects.filter(user=self.request.user)
         completed_filter = self.request.GET.get('completed')
         if completed_filter == 'true':
@@ -23,61 +24,48 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = TaskForm() # Add an empty form for creation
+        context['form'] = TaskForm() 
         return context
 
-    # Override the get method to handle AJAX requests for filtering  ///TALVEZ RANCAR ISSO
     def get(self, request, *args, **kwargs):
+        # Sobreescreve o método get para lidar com requisições AJAX para filtro.
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            self.object_list = self.get_queryset() # Get the filtered queryset
-            context = self.get_context_data() # Get context, which will include filtered tasks
+            self.object_list = self.get_queryset()
+            context = self.get_context_data()
             return render(request, 'tasks/_task_list_items.html', context)
         return super().get(request, *args, **kwargs)
 
 class TaskCreateView(LoginRequiredMixin, View):
-    # No contexto de HTTP, POST é usado para criar/enviar dados.
-    # Outros métodos incluem GET (recuperar), PUT (atualizar completo), PATCH (atualizar parcial), DELETE (remover).
-    # Para submissões de formulário HTML, POST é o padrão. Para AJAX, podemos usar outros métodos.
-    def post(self, request, *args, **kwargs): # **kwargs: captura argumentos de palavras-chave adicionais da URL (ex: pk)
+    def post(self, request, *args, **kwargs):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
             task.user = request.user
             task.save()
-            # 'x-requested-with': 'XMLHttpRequest' é um cabeçalho usado para identificar requisições AJAX.
-            # Não é uma medida de segurança, mas um indicador para o servidor saber como responder.
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest': #Headers AJAX
                 return JsonResponse({'success': True, 'task': {
                     'id': task.id,
                     'title': task.title,
                     'description': task.description,
                     'due_date': task.due_date.strftime('%Y-%m-%d') if task.due_date else None,
                     'completed': task.completed
-                }})
-            # 'tasks:task_list' é uma URL reversa. 'tasks' é o namespace do app e 'task_list' é o nome da URL.
-            # redirect() instrui o navegador a ir para esta URL.
+                }}, status=201)
             return redirect('tasks:task_list')
         else:
-            # Em caso de erro de validação (status 400 Bad Request é apropriado para erros do cliente)
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 errors = {field: form.errors[field][0] for field in form.errors} # Extrai o primeiro erro por campo
                 return JsonResponse({'success': False, 'errors': errors}, status=400)
-            # Para submissões de formulário não-AJAX com erros, re-renderiza a lista com o formulário e erros.
-            # Apenas um 'return' é executado por requisição, dependendo das condições.
-            return render(request, 'templates/tasks/task_list.html', { # Caminho do template corrigido
+            return render(request, 'templates/tasks/task_list.html', {
                 'form': form,
-                'tasks': Task.objects.filter(user=request.user).order_by('completed', 'due_date', 'created_at') # Garante a ordenação
+                'tasks': Task.objects.filter(user=request.user).order_by('completed', 'due_date', 'created_at')
             })
 
 class TaskUpdateView(LoginRequiredMixin, View):
-    # Embora PUT seja semanticamente ideal para atualizações RESTful, formulários HTML só suportam GET/POST.
-    # Usamos POST aqui para simplicidade, tanto para AJAX quanto para formulários HTML.
     def post(self, request, pk, *args, **kwargs):
         task = get_object_or_404(Task, pk=pk, user=request.user) # Garante que a tarefa pertence ao usuário logado
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             task = form.save()
-            # 'x-requested-with': 'XMLHttpRequest' é um cabeçalho usado para identificar requisições AJAX. Não é segurança.
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'task': {
                     'id': task.id,
@@ -94,10 +82,9 @@ class TaskUpdateView(LoginRequiredMixin, View):
             return redirect('tasks:task_list')
 
 class TaskDeleteView(LoginRequiredMixin, View):
-    # Usamos POST para simplicidade para botões de exclusão AJAX e não-AJAX.
     def post(self, request, pk, *args, **kwargs):
         task = get_object_or_404(Task, pk=pk, user=request.user) # Garante que a tarefa pertence ao usuário logado
         task.delete()
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'success': True})
+            return JsonResponse({}, status=HTTPStatus.NO_CONTENT)
         return redirect('tasks:task_list')
