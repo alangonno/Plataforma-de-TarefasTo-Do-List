@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const errorDiv = document.createElement('div');
         errorDiv.classList.add('alert', 'alert-error', 'global');
         errorDiv.setAttribute('role', 'alert');
-        errorDiv.innerHTML = `<p>${message}</p>`;
-        taskListContainer.prepend(errorDiv); // Adiciona a mensagem de erro ao topo do contêiner.
+        errorDiv.innerHTML = `<p>${DOMPurify.sanitize(message)}</p>`; // Sanitização
+        taskListContainer.prepend(errorDiv);
     }
 
     // Função auxiliar para limpar mensagens de erro globais.
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nonFieldErrorsDiv.classList.add('alert', 'alert-error');
             nonFieldErrorsDiv.setAttribute('role', 'alert');
             (Array.isArray(errors.__all__) ? errors.__all__ : [errors.__all__]).forEach(error => {
-                nonFieldErrorsDiv.innerHTML += `<p>${error}</p>`;
+                nonFieldErrorsDiv.innerHTML += `<p>${DOMPurify.sanitize(error)}</p>`; 
             });
             formElement.prepend(nonFieldErrorsDiv);
         }
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorDiv = document.createElement('div');
                     errorDiv.classList.add('alert', 'alert-error');
                     (Array.isArray(errors[fieldName]) ? errors[fieldName] : [errors[fieldName]]).forEach(error => {
-                        errorDiv.innerHTML += `<p>${error}</p>`;
+                        errorDiv.innerHTML += `<p>${DOMPurify.sanitize(error)}</p>`; 
                     });
                     // Insere a div de erro imediatamente após o campo de entrada.
                     fieldInput.parentNode.insertBefore(errorDiv, fieldInput.nextSibling);
@@ -147,63 +147,68 @@ document.addEventListener('DOMContentLoaded', () => {
                     createTaskForm.reset();
 
                     // Constrói o HTML dinamicamente.
+                    const sanitizedId = DOMPurify.sanitize(data.task.id);
+                    const sanitizedTitle = DOMPurify.sanitize(data.task.title);
+                    const sanitizedDescription = DOMPurify.sanitize(data.task.description || '');
+                    const sanitizedDueDate = data.task.due_date ? DOMPurify.sanitize(data.task.due_date) : '';
+
                     const newTaskHtml = `
-                        <li class="task-item" id="task-item-${data.task.id}">
-                            <div class="task-view" id="task-view-${data.task.id}">
+                        <li class="task-item" id="task-item-${sanitizedId}">
+                            <div class="task-view" id="task-view-${sanitizedId}">
                                 <div class="task-main">
                                     <div class="task-checkbox-wrapper">
                                         <input
                                             type="checkbox"
                                             ${data.task.completed ? 'checked' : ''}
-                                            data-task-id="${data.task.id}"
+                                            data-task-id="${sanitizedId}"
                                             class="task-checkbox task-completed-toggle"
-                                            id="checkbox-${data.task.id}"
+                                            id="checkbox-${sanitizedId}"
                                         >
-                                        <label for="checkbox-${data.task.id}" class="checkbox-custom"></label>
+                                        <label for="checkbox-${sanitizedId}" class="checkbox-custom"></label>
                                     </div>
 
                                     <div class="task-content">
-                                        <span class="task-title ${data.task.completed ? 'task-completed' : ''}">${data.task.title}</span>
-                                        ${data.task.due_date ? `<span class="task-due-date">Prazo: ${data.task.due_date}</span>` : ''}
-                                        <p class="task-description">${data.task.description || 'Sem descrição.'}</p>
+                                        <span class="task-title ${data.task.completed ? 'task-completed' : ''}">${sanitizedTitle}</span>
+                                        ${sanitizedDueDate ? `<span class="task-due-date">Prazo: ${sanitizedDueDate}</span>` : ''}
+                                        <p class="task-description">${sanitizedDescription || 'Sem descrição.'}</p>
                                     </div>
                                 </div>
 
                                 <div class="task-actions">
-                                    <button data-task-id="${data.task.id}" class="btn btn-edit edit-task-button">Editar</button>
-                                    <form action="/tasks/${data.task.id}/delete/" method="post" class="delete-task-form" style="display:inline;">
+                                    <button data-task-id="${sanitizedId}" class="btn btn-edit edit-task-button">Editar</button>
+                                    <form action="/tasks/${sanitizedId}/delete/" method="post" class="delete-task-form" style="display:inline;">
                                         <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
-                                        <button type="submit" data-task-id="${data.task.id}" class="btn btn-delete">Excluir</button>
+                                        <button type="submit" data-task-id="${sanitizedId}" class="btn btn-delete">Excluir</button>
                                     </form>
                                 </div>
                             </div>
 
-                            <div id="edit-form-${data.task.id}" class="task-edit-form" style="display:none;">
-                                <form class="edit-task-form-actual" data-task-id="${data.task.id}" action="/tasks/${data.task.id}/update/" method="post">
+                            <div id="edit-form-${sanitizedId}" class="task-edit-form" style="display:none;">
+                                <form class="edit-task-form-actual" data-task-id="${sanitizedId}" action="/tasks/${sanitizedId}/update/" method="post">
                                     <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
                                     <div class="form-group">
-                                        <label for="id_title_${data.task.id}" class="form-label">Título</label>
-                                        <input type="text" id="id_title_${data.task.id}" name="title" value="${data.task.title}" required class="form-input">
+                                        <label for="id_title_${sanitizedId}" class="form-label">Título</label>
+                                        <input type="text" id="id_title_${sanitizedId}" name="title" value="${sanitizedTitle}" required class="form-input">
                                     </div>
                                     <div class="form-group">
-                                        <label for="id_description_${data.task.id}" class="form-label">Descrição</label>
-                                        <textarea id="id_description_${data.task.id}" name="description" class="form-textarea">${data.task.description || ''}</textarea>
+                                        <label for="id_description_${sanitizedId}" class="form-label">Descrição</label>
+                                        <textarea id="id_description_${sanitizedId}" name="description" class="form-textarea">${sanitizedDescription}</textarea>
                                     </div>
                                     <div class="form-row form-row-split">
                                         <div class="form-group">
-                                            <label for="id_due_date_${data.task.id}" class="form-label">Data de Vencimento</label>
-                                            <input type="date" id="id_due_date_${data.task.id}" name="due_date" value="${data.task.due_date || ''}" class="form-input">
+                                            <label for="id_due_date_${sanitizedId}" class="form-label">Data de Vencimento</label>
+                                            <input type="date" id="id_due_date_${sanitizedId}" name="due_date" value="${sanitizedDueDate}" class="form-input">
                                         </div>
                                         <div class="form-group form-group-checkbox">
                                             <div class="checkbox-wrapper">
-                                                <input type="checkbox" id="id_completed_${data.task.id}" name="completed" ${data.task.completed ? 'checked' : ''} class="task-checkbox">
-                                                <label for="id_completed_${data.task.id}" class="checkbox-label">Concluída</label>
+                                                <input type="checkbox" id="id_completed_${sanitizedId}" name="completed" ${data.task.completed ? 'checked' : ''} class="task-checkbox">
+                                                <label for="id_completed_${sanitizedId}" class="checkbox-label">Concluída</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="edit-actions">
                                         <button type="submit" class="btn btn-primary">Salvar</button>
-                                        <button type="button" class="btn btn-secondary cancel-edit-button" data-task-id="${data.task.id}">Cancelar</button>
+                                        <button type="button" class="btn btn-secondary cancel-edit-button" data-task-id="${sanitizedId}">Cancelar</button>
                                     </div>
                                 </form>
                             </div>
@@ -389,11 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (task.due_date) {
                             if (dueDateSpan) {
                                 // Se o span de data de vencimento já existe, atualiza seu conteúdo.
-                                dueDateSpan.textContent = `Prazo: ${task.due_date}`;
+                                dueDateSpan.textContent = `Prazo: ${DOMPurify.sanitize(task.due_date)}`;
                             } else {
                                 // Se não existe, cria um novo span e o insere após o título.
                                 const titleSpan = taskItem.querySelector('.task-title');
-                                titleSpan.insertAdjacentHTML('afterend', `<span class="task-due-date">Prazo: ${task.due_date}</span>`);
+                                titleSpan.insertAdjacentHTML('afterend', `<span class="task-due-date">Prazo: ${DOMPurify.sanitize(task.due_date)}</span>`);
                             }
                         } else {
                             if (dueDateSpan) dueDateSpan.remove(); // Remove o span se a data de vencimento for removida.
