@@ -350,7 +350,7 @@ Siga os passos abaixo para configurar e executar o projeto em seu ambiente local
 
 1.  **Clone o Repositório**:
     ```bash
-    git clone https://github.com/seu-usuario/Plataforma-de-TarefasTo-Do-List.git
+    git clone https://github.com/alangonno/Plataforma-de-TarefasTo-Do-List.git
     cd Plataforma-de-TarefasTo-Do-List
     ```
 
