@@ -26,8 +26,8 @@ urlpatterns = [
     path('tasks/', include('apps.tasks.urls')),
     path('', config_views.home, name='home'),
 ]
-handler404 = 'config.views.error_view'
-handler500 = 'config.views.error_view'
+handler404 = 'config.views.page_not_found_view'
+handler500 = 'config.views.server_error_view'
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

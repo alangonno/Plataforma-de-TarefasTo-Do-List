@@ -1,21 +1,35 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 
 def home(request):
     return render(request, 'home.html')
 
-def error_view(request, exception=None, status_code=500):
-    message = ''
-    if status_code == 404:
-        message = 'Page Not Found.'
-    elif status_code == 500:
-        message = 'Internal Server Error.'
-
+def page_not_found_view(request, exception):
+    status_code = 404
+    # AJAX request caso 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Not Found'}, status=status_code)
+    
+    # Pagina template request.
     context = {
         'status_code': status_code,
-        'message': message,
-        'exception': exception, # Não passado para o usuario
+        'message': 'Page Not Found.',
     }
-
     response = render(request, 'error.html', context)
-    response.status_code = status_code # COnfirme que o status vai estar correto
+    response.status_code = status_code
+    return response
+
+def server_error_view(request):
+    status_code = 500
+    # AJAX request
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Internal Server Error'}, status=status_code)
+        
+    # Pagina template request
+    context = {
+        'status_code': status_code,
+        'message': 'Internal Server Error.',
+    }
+    response = render(request, 'error.html', context)
+    response.status_code = status_code
     return response

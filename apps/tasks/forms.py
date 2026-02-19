@@ -9,7 +9,7 @@ class TaskForm(forms.ModelForm):
         fields = ['title', 'description', 'due_date', 'completed']
         error_messages = {
             'title' : {
-                'required' : 'Este campo é obrigatório'
+                'required' : 'Este campo é obrigatório.'
             }
         }
         widgets = {

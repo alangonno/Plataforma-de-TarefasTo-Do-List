@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 .catch(error => {
-                    displayFormErrors(form, { '__all__': ['Ocorreu um erro de rede ao atualizar a tarefa.'] });
+                    displayFormErrors(form, { '__all__': ['Ocorreu um erro ao atualizar a tarefa.'] });
                 });
             };
         });

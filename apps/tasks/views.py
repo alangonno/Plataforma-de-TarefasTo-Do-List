@@ -55,14 +55,15 @@ class TaskCreateView(LoginRequiredMixin, View):
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 errors = {field: form.errors[field][0] for field in form.errors} # Extrai o primeiro erro por campo
                 return JsonResponse({'success': False, 'errors': errors}, status=400)
-            return render(request, 'templates/tasks/task_list.html', {
+            return render(request, 'tasks/task_list.html', {
                 'form': form,
                 'tasks': Task.objects.filter(user=request.user).order_by('completed', 'due_date', 'created_at')
             })
 
 class TaskUpdateView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
-        task = get_object_or_404(Task, pk=pk, user=request.user) # Garante que a tarefa pertence ao usuário logado
+        task = get_object_or_404(Task, pk=pk, user=request.user)
+
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             task = form.save()
@@ -83,8 +84,9 @@ class TaskUpdateView(LoginRequiredMixin, View):
 
 class TaskDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
-        task = get_object_or_404(Task, pk=pk, user=request.user) # Garante que a tarefa pertence ao usuário logado
+        task = get_object_or_404(Task, pk=pk, user=request.user)
         task.delete()
+        
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({}, status=HTTPStatus.NO_CONTENT)
+            return JsonResponse({'success': True})
         return redirect('tasks:task_list')
