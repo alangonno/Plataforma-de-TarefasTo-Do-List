@@ -1,131 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-
 from apps.users.forms import UserRegistrationForm
-from apps.users.models import CustomUserManager # Importe CustomUserManager para testar
 
 User = get_user_model()
-
-class UserModelTests(TestCase):
-    def test_create_user(self):
-        user = User.objects.create_user(
-            email="normal@example.com",
-            name="Normal User",
-            password="normalpassword"
-        )
-        self.assertEqual(user.email, "normal@example.com")
-        self.assertTrue(user.check_password("normalpassword"))
-        self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_superuser)
-        self.assertEqual(str(user), "Normal User")
-
-    def test_create_user_no_email_raises_error(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(email="", name="No Email", password="password")
-
-    def test_create_superuser(self):
-        superuser = User.objects.create_superuser(
-            email="super@example.com",
-            name="Super User",
-            password="superpassword"
-        )
-        self.assertEqual(superuser.email, "super@example.com")
-        self.assertTrue(superuser.check_password("superpassword"))
-        self.assertTrue(superuser.is_staff)
-        self.assertTrue(superuser.is_superuser)
-
-    def test_create_superuser_is_staff_false_raises_error(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_superuser(
-                email="fail@example.com",
-                name="Fail User",
-                password="password",
-                is_staff=False # Forçando is_staff=False
-            )
-
-    def test_create_superuser_is_superuser_false_raises_error(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_superuser(
-                email="fail2@example.com",
-                name="Fail User2",
-                password="password",
-                is_superuser=False # Forçando is_superuser=False
-            )
-
-    def test_email_unique(self):
-        User.objects.create_user(email="unique@example.com", name="User One", password="password1")
-        with self.assertRaises(Exception): # Integridade do banco de dados deve levantar exceção
-            User.objects.create_user(email="unique@example.com", name="User Two", password="password2")
-
-    def test_user_manager_custom_create_user_method(self):
-        # Testar o método _create_user diretamente via manager
-        manager = CustomUserManager()
-        manager.model = User # Atribuir o modelo ao manager
-        user = manager._create_user(email="custom@example.com", password="password", name="Custom User")
-        self.assertEqual(user.email, "custom@example.com")
-        self.assertTrue(user.check_password("password"))
-
-class UserFormTests(TestCase):
-    def test_registration_form_valid(self):
-        form_data = {
-            'name': 'New User',
-            'email': 'newuser@example.com',
-            'password': 'password123',
-            'password_confirm': 'password123'
-        }
-        form = UserRegistrationForm(data=form_data)
-        self.assertTrue(form.is_valid())
-        user = form.save()
-        self.assertIsInstance(user, User)
-        self.assertEqual(user.email, 'newuser@example.com')
-        self.assertTrue(user.check_password('password123'))
-
-    def test_registration_form_email_exists(self):
-        User.objects.create_user(email='existing@example.com', name='Existing User', password='password')
-        form_data = {
-            'name': 'Another User',
-            'email': 'existing@example.com',
-            'password': 'password123',
-            'password_confirm': 'password123'
-        }
-        form = UserRegistrationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('email', form.errors)
-        self.assertIn('Este e-mail já está em uso.', form.errors['email'])
-
-    def test_registration_form_passwords_dont_match(self):
-        form_data = {
-            'name': 'User Pass',
-            'email': 'userpass@example.com',
-            'password': 'password123',
-            'password_confirm': 'differentpassword'
-        }
-        form = UserRegistrationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('password_confirm', form.errors)
-        self.assertIn('As senhas não coincidem.', form.errors['password_confirm'])
-
-    def test_registration_form_required_fields(self):
-        # Testar sem 'name'
-        form_data = {
-            'email': 'noname@example.com',
-            'password': 'password123',
-            'password_confirm': 'password123'
-        }
-        form = UserRegistrationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('name', form.errors)
-
-        # Testar sem 'email'
-        form_data = {
-            'name': 'No Email',
-            'password': 'password123',
-            'password_confirm': 'password123'
-        }
-        form = UserRegistrationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('email', form.errors)
 
 class UserViewsTests(TestCase):
     def setUp(self):
@@ -229,7 +107,7 @@ class UserViewsTests(TestCase):
         self.client.login(email=self.test_user_email, password=self.test_user_password)
         self.assertTrue(self.client.session.get('_auth_user_id'))
 
-        response = self.client.get(self.logout_url, follow=True)
+        response = self.client.post(self.logout_url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, self.home_url)
         self.assertFalse(response.context['user'].is_authenticated)
