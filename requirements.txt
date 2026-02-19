@@ -1,0 +1,6 @@
+Django==5.1.7
+pytest==9.0.2
+pytest-django==4.11.1
+python-dotenv==1.0.1 
+psycopg[binary,pool]==3.2.4 # Para postgres
+gunicorn==23.0.0 # Para Docker

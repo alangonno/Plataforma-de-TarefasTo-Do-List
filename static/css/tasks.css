@@ -1,0 +1,256 @@
+/* ============================================
+   TASKS.CSS - Estilização de Tarefas
+   Design: Cards com elevação, filtros modernos, edição inline
+   ============================================ */
+
+/* Tasks Container */
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.tasks-header {
+    margin-bottom: var(--space-md);
+}
+
+.tasks-title {
+    font-size: 3rem;
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+/* Section Cards */
+.section-card {
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-lg);
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+/* Task Creation Section */
+.task-creation-section {
+    margin-bottom: var(--space-lg);
+}
+
+/* Task Filter Section */
+.task-filter-section {
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: var(--space-sm) var(--space-lg);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-btn:hover {
+    background-color: var(--color-bg);
+    transform: translate(1px, 1px);
+}
+
+.filter-btn-active,
+.filter-btn.filter-btn-active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-border);
+    box-shadow: var(--shadow-md);
+}
+
+.filter-btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Task List */
+.task-list-section {
+    margin-top: var(--space-lg);
+}
+
+.task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.task-item {
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.task-item:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translate(-1px, -1px);
+}
+
+/* Task View */
+.task-view {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.task-main {
+    display: flex;
+    gap: var(--space-md);
+    flex: 1;
+}
+
+.task-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.task-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    transition: all var(--transition-fast);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1; /* Limit to 1 line */
+    -webkit-box-orient: vertical;
+    max-height: calc(1.25rem * 1.5); /* Approximate height for 1 line based on font-size and assumed line-height */
+    word-break: break-word; /* Ensure long words break */
+}
+
+.task-completed {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+.task-due-date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    background-color: var(--color-bg);
+    padding: var(--space-xs) var(--space-sm);
+    border: 2px solid var(--color-border-light);
+    display: inline-block;
+    margin-top: var(--space-xs);
+}
+
+.task-description {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-top: var(--space-xs);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    max-height: calc(1.5em * 2); /* Approximate height for 2 lines based on line-height */
+    word-break: break-word; /* Ensure long words break */
+}
+
+/* Task Actions */
+.task-actions {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.btn-edit {
+    padding: var(--space-xs) var(--space-md);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-edit:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: translate(1px, 1px);
+}
+
+.btn-delete {
+    padding: var(--space-xs) var(--space-md);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    background-color: var(--color-error);
+    color: white;
+    border: var(--border-width) solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+    transform: translate(1px, 1px);
+}
+
+.btn-edit:focus,
+.btn-delete:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Task Edit Form */
+.task-edit-form {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: var(--border-width) solid var(--color-border-light);
+}
+
+.edit-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+/* Empty State */
+.task-empty {
+    text-align: center;
+    padding: var(--space-2xl);
+    background-color: var(--color-bg);
+    border: var(--border-width) solid var(--color-border-light);
+}
+
+.empty-message {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Delete Form Inline */
+.delete-task-form {
+    display: inline;
+}

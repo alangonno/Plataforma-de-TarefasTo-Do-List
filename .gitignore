@@ -1,0 +1,24 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+/media/
+
+# Environments
+.env
+venv/
+
+# IDE
+.vscode/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+GEMINI.md
+project.md
+staticfiles/
+

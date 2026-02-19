@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gerenciamento de Tarefas{% endblock %}</title>
+    
+    <!-- Google Fonts: Space Grotesk (display) + Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tasks.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+<body>
+    <div class="site-wrapper">
+        {% if user.is_authenticated %}
+        <header class="site-header">
+            <div class="header-content">
+                <h1 class="logo">To-Do List</h1>
+                <nav class="main-nav">
+                    <a href="{% url 'tasks:task_list' %}" class="nav-link">Minhas Tarefas</a>
+                    <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-logout">Sair</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+        {% endif %}
+        
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <footer class="site-footer">
+            <p>&copy; 2026 To-Do List. Sistema de Gerenciamento de Tarefas.</p>
+        </footer>
+    </div>
+</body>
+</html>

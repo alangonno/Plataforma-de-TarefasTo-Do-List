@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minhas Tarefas - To-Do List{% endblock %}
+
+{% block content %}
+<!-- Design: Cards com elevação pronunciada, filtros estilizados, edição inline -->
+<div class="tasks-container">
+    <div class="tasks-header">
+        <h1 class="tasks-title">Minhas Tarefas</h1>
+    </div>
+
+    <div class="task-creation-section">
+        <div class="section-card" id="task-creation-form">
+            <h2 class="section-title">Criar Nova Tarefa</h2>
+            <form id="create-task-form" method="post" action="{% url 'tasks:task_create' %}" class="task-form" novalidate>
+                {% csrf_token %}
+
+
+                <div class="form-row">
+                    <div class="form-group form-group-wide">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Título</label>
+                        {{ form.title }}
+                        
+                
+                <div class="form-row">
+                    <div class="form-group form-group-wide">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                        {{ form.description }}
+                        
+                    </div>
+                </div>
+                
+                <div class="form-row form-row-split">
+                    <div class="form-group">
+                        <label for="{{ form.due_date.id_for_label }}" class="form-label">Data de Vencimento</label>
+                        {{ form.due_date }}
+                        
+                    </div>
+                    <div class="form-group form-group-checkbox">
+                        <div class="task-checkbox-wrapper">
+                            {{ form.completed }}
+                            
+                            <label for="{{ form.completed.id_for_label }}" class="checkbox-custom"></label>
+                            <label for="{{ form.completed.id_for_label }}" class="form-label">Concluída:</label>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Adicionar Tarefa</button>
+            </form>
+
+        </div>
+    </div>
+
+    <div class="task-filter-section">
+        <div class="section-card" id="task-filter">
+            <h2 class="section-title">Filtrar Tarefas</h2>
+            <div class="filter-buttons">
+                <button data-filter="all" class="filter-btn filter-btn-active">Todas</button>
+                <button data-filter="false" class="filter-btn">Pendentes</button>
+                <button data-filter="true" class="filter-btn">Concluídas</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="task-list-section">
+        <div id="task-list-container" data-task-list-url="{% url 'tasks:task_list' %}">
+            {% include 'tasks/_task_list_items.html' %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/vendor/purify.min.js' %}"></script>
+<script src="{% static 'js/tasks.js' %}"></script>
+{% endblock %}

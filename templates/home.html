@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">To Do List</h1>
+            <p class="hero-subtitle">Gerencie suas tarefas com eficiência e estilo</p>
+            
+            {% if user.is_authenticated %}
+                <div class="welcome-card">
+                    <h2 class="welcome-title">Bem-vindo, {{ user.name }}!</h2>
+                    <p class="welcome-text">Você está logado e pronto para organizar suas tarefas.</p>
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-primary">Ir para Minhas Tarefas</a>
+                </div>
+            {% else %}
+                <div class="cta-buttons">
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">Login</a>
+                    <a href="{% url 'users:register' %}" class="btn btn-secondary">Cadastro</a>
+                </div>
+                <p class="cta-text">Faça <a href="{% url 'users:login' %}" class="inline-link">login</a> ou <a href="{% url 'users:register' %}" class="inline-link">registre-se</a> para começar.</p>
+            {% endif %}
+        </div>
+        
+        <div class="hero-visual">
+            <div class="visual-element visual-box-1"></div>
+            <div class="visual-element visual-box-2"></div>
+            <div class="visual-element visual-box-3"></div>
+        </div>
+    </div>
+    
+    <div class="features-section">
+        <div class="feature-card">
+            <h3 class="feature-title">Organize</h3>
+            <p class="feature-text">Crie e gerencie suas tarefas de forma intuitiva</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Filtre</h3>
+            <p class="feature-text">Visualize tarefas pendentes ou concluídas</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Controle</h3>
+            <p class="feature-text">Edite e acompanhe prazos facilmente</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
