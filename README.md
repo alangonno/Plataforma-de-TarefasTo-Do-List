@@ -384,13 +384,6 @@ Siga os passos abaixo para configurar e executar o projeto em seu ambiente local
     
         *   Certifique-se de que o banco de dados definido em `DB_NAME` já exista no seu servidor PostgreSQL.
         *   `USE_POSTGRES=True`
-        *   Execute as Migrações do Banco de Dados: Sempre que alterar o banco no `.env.example`, você deve aplicar as migrações para o novo banco.
-            ```bash
-            python manage.py migrate
-            ```
-
-    **Atenção:** Os dados do SQLite e do PostgreSQL são independentes. Se você alternar o banco, precisará criar um novo superusuário para o banco que estiver ativo.
-
 
 3.  **Crie um Superusuário (Opcional, mas Recomendado)**:
     Para acessar o painel administrativo do Django, crie um superusuário.
@@ -399,7 +392,17 @@ Siga os passos abaixo para configurar e executar o projeto em seu ambiente local
     ```
     Siga as instruções no terminal para definir nome de usuário, e-mail e senha.
 
-### 6.4. Execute o Servidor de Desenvolvimento
+### 6.4 Execute as migrações
+
+```bash
+python manage.py migrate
+```
+
+Sempre que alterar o banco no `.env.example`, você deve aplicar as migrações para o novo banco.
+
+**Atenção:** Os dados do SQLite e do PostgreSQL são independentes. Se você alternar o banco, precisará criar um novo superusuário para o banco que estiver ativo.
+
+### 6.5. Execute o Servidor de Desenvolvimento
 
 Finalmente, inicie o servidor de desenvolvimento do Django.
 ```bash
